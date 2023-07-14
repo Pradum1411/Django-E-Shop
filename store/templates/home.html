@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load cart %}
+<div>
+    {% if messages %}
+    {% for i in messages%}
+    <div class="alert alert-dismissible alert-success fade show" role="alert">
+        <center>
+            <strong>{{i}}</strong>
+        </center>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+
+    {% endif %}
+    <div class="row">
+        <!-- product category -->
+        <div class="col-lg-2">
+            <div class="list-group mx-3">
+                <a href="/category/0" class="list-group-item list-group-item-action btn-info">All Product</a>
+                {% for i in product %}
+                <a href="/category/{{i.id}}" class="list-group-item list-group-item-action btn-info">{{i}}</a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- show product -->
+        <div id="product" class="col-lg-10">
+            <div class="row mx-auto">
+                {{error}}
+                {% for i in productdata %}
+                <div class="card mb-3 mx-auto" id="{{i.id}}" style="width: 16rem;">
+                    <img src="{{i.image.url}}" class="card-img-top" alt="...">
+                    <!-- <img src="https://picsum.photos/200/300?smartphone" class="card-img-top" alt="..."> -->
+                    <div class="card-body">
+                        <h5 class="card-title">{{i.name}}</h5>
+                        <p class="card-text">₹{{i.price}}</p>
+                        <p class="card-text">{{i.description}}</p>
+                    </div>
+
+                    {% if i|is_in_cart:request.session.cart %}
+                    <div class="row">
+
+                        <form action='cart/' class="col-lg-2" method="post">
+                            {% csrf_token %}
+                            <input hidden type="text" name='product' value='{{i.id}}'>
+                            <input hidden type="text" name='remove' value='True'>
+                            <input type="submit" value=" - " class="btn btn-block btn-light border-right">
+                        </form>
+
+
+                        <div class="col-lg-7 text-center">
+
+
+                            <input type="submit" value="{{i|cart_quantity:request.session.cart}} in Cart"
+                                class="btn btn-block btn-light border-right">
+                        </div>
+
+                        <form action="{% url 'cart' %}" class="col-lg-2" method="post">
+                            {% csrf_token %}
+                            <input hidden type="text" name='product' value='{{i.id}}'>
+                            <input type="submit" value=" + " class="btn btn-block btn-light border-right">
+                        </form>
+
+                    </div>
+                    {% else %}
+
+                    <div class="card-footer">
+                        <form action="{% url 'cart' %}" method="POST" class="">
+                            {% csrf_token %}
+                            <input hidden type="text" name='product' value='{{i.id}}'>
+                            <input type="submit" class="float-right btn btn-light  form-control" value="Add To Cart">
+                        </form>
+                    </div>
+                    {% endif %}
+
+                </div>
+                {% endfor %}
+            </div>
+            <nav aria-label="Page navigation example" class="float-right">
+                <ul class="pagination pagination justify-content-center">
+                    {% if productdata.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+                    <li class="page-item"><a class="page-link"
+                            href="?page={{productdata.previous_page_number}}">Previous</a></li>
+                    {% endif %}
+                    {% for i in totalpagelist %}
+                    <li class="page-item"><a class="page-link" href="?page={{i}}">{{i}}</a></li>
+                    {% endfor %}
+                    {% if productdata.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{productdata.next_page_number}}">Next</a>
+                    </li>
+
+                    <li class="page-item"><a class="page-link" href="?page={{las_tpage}}">Last</a></li>
+                    {% endif %}
+
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>
+{% endblock content %}
